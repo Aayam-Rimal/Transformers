@@ -30,13 +30,14 @@ class tsf_block:
 
         return ln2
 
+if __name__=="__main__":
 
-x= np.random.randn(1,4,4)
+    x= np.random.randn(1,4,4)
 
-block1= tsf_block(4,1,8)
+    block1= tsf_block(4,1,8)
 
-output= block1.forward(x)
+    output= block1.forward(x)
 
-print(output)
+    print(output)
         
 
