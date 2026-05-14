@@ -16,7 +16,7 @@ class tsf_block:
     
     def forward(self,x):
 
-        z= self.attention.forward(x)
+        z= self.attention.forward(x,x,x,mask=None)
 
         residual1= z + x
 
