@@ -16,26 +16,27 @@ class MHA:
     
     def softmax(self,x):
 
-        x= x - np.max(x, axis=1, keepdims=True)
+        x= x - np.max(x, axis=-1, keepdims=True)
         exp_x = np.exp(x)
         return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
 
 
 
-    def forward(self,x):
+    def forward(self,q,k,v, mask=None):
 
-        B,S,D= x.shape
+        B,Sq,D= q.shape
+        _,Sk,_= k.shape
         H= self.num_heads
         Dh= self.head_dim
 
-        Q= x @ self.Wq
-        K= x @ self.Wk
-        V= x @ self.Wv
+        Q= q @ self.Wq
+        K= k @ self.Wk
+        V= v @ self.Wv
 
 
-        Q= Q.reshape(B,S,H,Dh)
-        K= K.reshape(B,S,H,Dh)
-        V= V.reshape(B,S,H,Dh)
+        Q= Q.reshape(B,Sq,H,Dh)
+        K= K.reshape(B,Sk,H,Dh)
+        V= V.reshape(B,Sk,H,Dh)
 
 
         Q= Q.transpose(0,2,1,3)
@@ -45,12 +46,15 @@ class MHA:
         score= Q @ K.transpose(0,1,3,2)
         score= score/np.sqrt(Dh)
 
+        if mask is not None:
+            score= score + mask
+
         attn= self.softmax(score)
 
         out= attn @ V
 
         out= out.transpose(0,2,1,3)
-        out= out.reshape(B,S,D)
+        out= out.reshape(B,Sq,D)
 
         out= out @ self.Wo
 
