@@ -11,13 +11,14 @@ class decoder_block:
         self.ln1= LN(d_model, eps=1e-5)
         self.ln2= LN(d_model, eps=1e-5)
         self.ln3= LN(d_model, eps=1e-5)
-        self.attention= MHA(d_model,num_heads)
+        self.self_attn= MHA(d_model,num_heads)
+        self.cross_attn= MHA(d_model,num_heads)
 
         self.eps= eps
 
-    def forward(self,x,enc_out):
+    def forward(self,tgt,enc_out):
 
-        B,S,D= x.shape
+        B,S,D= tgt.shape
 
         mask= np.ones((S,S))
         mask= np.triu(mask, k=1)
@@ -25,11 +26,11 @@ class decoder_block:
         mask= mask * -1e9
         mask = mask[None, None, :, :]
 
-        z= self.attention.forward(x,x,x,mask=mask)
-        residual1= z + x
+        z= self.self_attn.forward(tgt,tgt,tgt,mask=mask)
+        residual1= z + tgt
         ln1= self.ln1.norm(residual1)
 
-        z2= self.attention.forward(q=ln1, k=enc_out, v=enc_out, mask=None)
+        z2= self.cross_attn.forward(q=ln1, k=enc_out, v=enc_out, mask=None)
 
         x= ln1 + z2
         x = self.ln2.norm(x)
