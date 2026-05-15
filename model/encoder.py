@@ -3,7 +3,7 @@ from FFN import FFN
 from LayerNorm import LN
 from Attention import MHA
 
-class tsf_block:
+class encoder_block:
 
     def __init__(self,d_model, num_heads, d_ff,eps=1e-5):
 
@@ -14,11 +14,11 @@ class tsf_block:
         self.eps= eps
 
     
-    def forward(self,x):
+    def forward(self,src):
 
-        z= self.attention.forward(x,x,x,mask=None)
+        z= self.attention.forward(src,src,src,mask=None)
 
-        residual1= z + x
+        residual1= z + src
 
         ln1= self.ln.norm(residual1)
 
@@ -34,7 +34,7 @@ if __name__=="__main__":
 
     x= np.random.randn(1,4,4)
 
-    block1= tsf_block(4,1,8)
+    block1= encoder_block(4,1,8)
 
     output= block1.forward(x)
 
